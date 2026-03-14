@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import psutil
 
+from preprocessing_analyzer import PreprocessingAnalyzer
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -177,6 +179,7 @@ class CIPipelineValidator:
         self.ml_predictor = MLRiskPredictor(models_dir)
         self.risk_scorer = RiskScoringEngine()
         self.dataset_profiler = DatasetProfiler()
+        self.preprocessing_analyzer = PreprocessingAnalyzer()
 
         self.stats = {
             "files_validated": 0,
@@ -205,6 +208,17 @@ class CIPipelineValidator:
                 result.syntax_valid = True
                 result.schema_valid = True
                 result.content_ok = True
+
+            elif file_extension == ".py":
+                result.syntax_valid = True
+                result.schema_valid = True
+                result.content_ok = True
+
+                analysis = self.preprocessing_analyzer.analyze(filepath)
+                result.details["preprocessing_analysis"] = analysis
+
+                for warning in analysis.get("warnings", []):
+                    result.warnings.append(warning)
 
             # Syntax validation
             if filepath.endswith(".json"):
@@ -270,7 +284,6 @@ class CIPipelineValidator:
                 # ------------------------------------
                 # System RAM Risk Detection
                 # ------------------------------------
-                import psutil
 
                 system_ram_mb = psutil.virtual_memory().total / (1024 * 1024)
 
@@ -284,7 +297,7 @@ class CIPipelineValidator:
             # ML
             features = self.feature_extractor.extract(data, filepath)
             try:
-                ml_risk = self.risk_predictor.predict_risk(features)
+                ml_risk = self.ml_predictor.predict_risk(features)
             except Exception as e:
                 ml_risk = 0.0
                 result.warnings.append("ML model skipped due to feature mismatch")
@@ -314,7 +327,7 @@ class CIPipelineValidator:
 
         return result
 
-    # ✅ API / Backend friendly wrapper
+    # API / Backend friendly wrapper
     def validate_file_dict(self, filepath: str) -> Dict:
         return self.validate_file(filepath).to_dict()
 
