@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 import psutil
 
+import warnings
+warnings.filterwarnings("ignore")
+
 from dataset_profiler import DatasetProfiler
 
 
