@@ -5,3 +5,153 @@ matplotlib>=3.4.0
 seaborn>=0.11.0
 pyyaml>=5.4.0
 jsonschema>=3.2.0
+
+
+# ============================================
+# CONTINUE STEP 8.4: REMAINING TESTS
+# ============================================
+# -------------------------------
+# Start message (code execution started)
+# -------------------------------
+print("\n" + "="*70)
+print("STEP 8.4: REMAINING TESTS")
+print("="*70)
+
+# -------------------------------
+# Define directories for test data
+# -------------------------------
+# These folders contain different types of JSON files
+# valid → correct JSON
+# invalid → wrong structure
+# corrupted → broken JSON
+
+valid_dir = os.path.join(CONFIG["RAW_DIR"], "configs", "valid")
+invalid_dir = os.path.join(CONFIG["RAW_DIR"], "configs", "invalid")
+corrupted_dir = os.path.join(CONFIG["RAW_DIR"], "configs", "corrupted")
+
+# -------------------------------
+# Helper function to get JSON files
+# -------------------------------
+def get_json_files(directory):
+    # checks if directory exists
+    if os.path.exists(directory):
+        # returns only .json files from folder
+        return [f for f in os.listdir(directory) if f.endswith('.json')]
+    return []  # if folder not found, return empty list
+
+# get file lists
+valid_files = get_json_files(valid_dir)
+invalid_files = get_json_files(invalid_dir)
+corrupted_files = get_json_files(corrupted_dir)
+
+print("Test directories loaded successfully")  # confirms setup done
+
+
+# -----------------------------------------
+# TEST 5: Full Pipeline Run
+# -----------------------------------------
+print("\n" + "-"*50)
+print("TEST 5: Full Pipeline Run (Orchestrator)")
+print("-"*50)
+
+# run full pipeline on valid directory
+if valid_files:
+    print("Running full pipeline on valid files...")  # shows test running
+    
+    pipeline_result = orchestrator.run_validation(
+        target=valid_dir,              # folder path
+        mode='directory',              # process entire directory
+        fail_on_high_risk=True,        # stop if risky files found
+        generate_reports=True          # generate output reports
+    )
+    
+    print("Pipeline execution completed")  # confirms pipeline finished
+else:
+    print("No files for pipeline test")  # no test data available
+
+
+# -----------------------------------------
+# TEST 6: Quick Check API
+# -----------------------------------------
+print("\n" + "-"*50)
+print("TEST 6: Quick Check API")
+print("-"*50)
+
+print("\nTesting quick_check() method:")  # shows test start
+
+# test with valid file
+if valid_files:
+    test_file = os.path.join(valid_dir, valid_files[0])  # pick first valid file
+    is_safe = orchestrator.quick_check(test_file)       # run quick check
+    status = "SAFE" if is_safe else "HIGH RISK"
+    print("Valid file result: " + status)
+
+# test with corrupted file
+if corrupted_files:
+    test_file = os.path.join(corrupted_dir, corrupted_files[0])
+    is_safe = orchestrator.quick_check(test_file)
+    status = "SAFE" if is_safe else "HIGH RISK"
+    print("Corrupted file result: " + status)
+
+# test with non-existent file
+is_safe = orchestrator.quick_check("/path/to/nonexistent.json")
+status = "SAFE" if is_safe else "HIGH RISK"
+print("Non-existent file result: " + status)
+
+print("Quick check testing completed")  # confirms test done
+
+
+# -----------------------------------------
+# TEST 7: Run History
+# -----------------------------------------
+print("\n" + "-"*50)
+print("TEST 7: Run History")
+print("-"*50)
+
+# get all previous runs from orchestrator
+history = orchestrator.get_run_history()
+
+print("\nTotal pipeline runs: " + str(len(history)))  # number of runs stored
+
+# show last 3 runs
+if history:
+    print("\nRecent runs:")
+    for run in history[-3:]:   # slice last 3 runs
+        print("Run ID: " + run['run_id'] + " | Status: " + run['status'])
+
+print("Run history checked successfully")  # confirms done
+
+
+# -----------------------------------------
+# Final Statistics
+# -----------------------------------------
+print("\n" + "-"*50)
+print("FINAL VALIDATION STATISTICS")
+print("-"*50)
+
+# get stats from validator
+stats = validator.get_stats()
+
+print("\nFiles Validated: " + str(stats['files_validated']))
+print("Files Passed: " + str(stats['files_passed']))
+print("Files Failed: " + str(stats['files_failed']))
+print("High Risk Count: " + str(stats['high_risk_count']))
+
+# calculate pass rate
+if stats['files_validated'] > 0:
+    pass_rate = stats['files_passed'] / stats['files_validated'] * 100
+    print("\nPass Rate: " + str(round(pass_rate, 1)) + "%")
+
+print("\nAll tests completed successfully")  # final confirmation
+
+
+# -------------------------------------------------------------
+# FINAL EXPLANATION (VERY SIMPLE FOR BEGINNERS)
+# -------------------------------------------------------------
+# In this step, we tested the complete system.
+# First, we defined folders that contain different types of JSON files.
+# Then we ran the full pipeline using the orchestrator to validate files.
+# After that, we tested a quick_check function which quickly tells if a file is safe or not.
+# Then we checked the run history to see previous executions.
+# Finally, we printed overall statistics like how many files passed or failed.
+# So this step is basically testing and verifying that the whole system works correctly.
