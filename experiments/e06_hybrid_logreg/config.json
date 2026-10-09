@@ -1,0 +1,56 @@
+{
+    "experiment_id": "e06_hybrid_logreg",
+    "dataset_version": "v1",
+    "representation": "hybrid",
+    "vectorizer_parameters": {
+        "ngram_range": [
+            1,
+            2
+        ],
+        "min_df": 2,
+        "max_df": 0.95,
+        "sublinear_tf": true,
+        "strip_accents": "unicode"
+    },
+    "use_scaler": true,
+    "model_parameters": {
+        "model_type": "LogisticRegression",
+        "solver": "lbfgs",
+        "class_weight": null,
+        "random_state": 42,
+        "max_iter": 2000
+    },
+    "random_seed": 42,
+    "training_start": "2026-08-19T03:14:54.822269",
+    "training_end": "2026-08-19T03:15:19.719134",
+    "runtime_seconds": 24.896864652633667,
+    "software_versions": {
+        "python": "3.11.15 (main, Aug  7 2026, 02:24:19) [MSC v.1944 64 bit (AMD64)]",
+        "pandas": "3.0.5",
+        "scikit-learn": "1.9.0"
+    },
+    "best_validation_metric": 0.48568677579511643,
+    "test_metrics": {
+        "accuracy": 0.4995029821073559,
+        "balanced_accuracy": 0.4989231985054676,
+        "macro_precision": 0.4962831937320886,
+        "macro_recall": 0.4989231985054676,
+        "macro_f1": 0.49718068330698895,
+        "weighted_f1": 0.49778212332122856,
+        "per_class_precision": {
+            "0": 0.5625,
+            "1": 0.4629349470499244,
+            "2": 0.4634146341463415
+        },
+        "per_class_recall": {
+            "0": 0.6052631578947368,
+            "1": 0.4340425531914894,
+            "2": 0.45746388443017655
+        },
+        "per_class_f1": {
+            "0": 0.5830985915492958,
+            "1": 0.4480234260614934,
+            "2": 0.4604200323101777
+        }
+    }
+}

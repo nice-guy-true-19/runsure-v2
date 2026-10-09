@@ -1,0 +1,11 @@
+*.pt
+*.bin
+*.pth
+*.safetensors
+*.joblib
+!experiments/e06_hybrid_logreg/model.joblib
+__pycache__/
+.venv/
+node_modules/
+.pytest_cache/
+*.parquet

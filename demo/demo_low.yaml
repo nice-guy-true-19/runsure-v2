@@ -1,0 +1,186 @@
+name: cron-update
+'on':
+  workflow_dispatch: null
+  schedule:
+  - cron: 0 5 * * *
+env: {}
+defaults: {}
+concurrency: null
+permissions: null
+jobs:
+  cron-update:
+    name: cron-update
+    runs_on: ubuntu-latest
+    needs: null
+    if: null
+    environment: null
+    concurrency: null
+    outputs: {}
+    env: {}
+    defaults: {}
+    timeout_minutes: null
+    strategy: null
+    continue_on_error: false
+    container: null
+    services: {}
+    steps:
+    - index: 0
+      name: init / checkout
+      id: null
+      if: null
+      uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+      run: null
+      shell: null
+      with:
+        ref: master
+        fetch-depth: 0
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 1
+      name: cron-update / get latest version
+      id: null
+      if: null
+      uses: null
+      run: 'echo "LATEST_VERSION=$(curl -s https://api.github.com/repos/raydak-labs/configarr/releases/latest
+        | jq -r ''.tag_name'' | sed ''s/v//'')" >> "${GITHUB_ENV}"
+
+        echo "LATEST_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --max-count=1`
+        | sed ''s/v//'')" >> "${GITHUB_ENV}"
+
+        '
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 2
+      name: cron-update / setup node
+      id: null
+      if: null
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      run: null
+      shell: null
+      with:
+        node-version: '20'
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 3
+      name: null
+      id: null
+      if: null
+      uses: null
+      run: npm i semver
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 4
+      name: cron-update / compare latest with current version
+      id: null
+      if: null
+      uses: actions/github-script@62c3794a3eb6788d9a2a72b219504732c0c9a298
+      run: null
+      shell: null
+      with:
+        script: "const { existsSync, readFileSync, writeFileSync } = require('node:fs');\n\
+          const { resolve } = require('node:path');\nconst { inspect } = require('node:util');\n\
+          const semver = require('semver')\nconst repository = {dot:{}};\n\ntry{\n\
+          \  const path = resolve('.json');\n  if(existsSync(path)){\n    try{\n \
+          \     repository.dot = JSON.parse(readFileSync(path).toString());\n    }catch(e){\n\
+          \      throw new Error('could not parse .json');\n    }\n  }else{\n    throw\
+          \ new Error('.json does not exist');\n  }\n}catch(e){\n  core.setFailed(e);\n\
+          }\n\nconst latest = semver.valid(semver.coerce('${{ env.LATEST_VERSION }}'));\n\
+          const current = semver.valid(semver.coerce(repository.dot.semver.version));\n\
+          const tag = semver.valid(semver.coerce('${{ env.LATEST_TAG }}'));\n\nif(latest\
+          \ && latest !== current){\n  core.info(`new ${semver.diff(current, latest)}\
+          \ release found (${latest})!`)\n  repository.dot.semver.version = latest;\n\
+          \  if(tag){\n    core.exportVariable('WORKFLOW_NEW_TAG', semver.inc(tag,\
+          \ semver.diff(current, latest)));\n  }\n\n  if(repository.dot.semver?.latest){\n\
+          \    repository.dot.semver.latest = repository.dot.semver.version;\n  }\n\
+          \n  if(repository.dot?.readme?.comparison?.image){\n    repository.dot.readme.comparison.image\
+          \ = repository.dot.readme.comparison.image.replace(current, repository.dot.semver.version);\n\
+          \  }\n\n  if(repository.dot?.build?.args?.version_build){\n    repository.dot.build.args.version_build\
+          \ = '${{ env.LATEST_VERSION }}'.split('.')[3];\n  }\n\n  try{\n    writeFileSync(resolve('.json'),\
+          \ JSON.stringify(repository.dot, null, 2));\n    core.exportVariable('WORKFLOW_AUTO_UPDATE',\
+          \ true);\n  }catch(e){\n    core.setFailed(e);\n  }\n}else{\n  core.info('no\
+          \ new release found');\n}\n\ncore.info(inspect(repository.dot, {showHidden:false,\
+          \ depth:null, colors:true}));\n"
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 5
+      name: cron-update / checkout
+      id: checkout
+      if: env.WORKFLOW_AUTO_UPDATE == 'true'
+      uses: null
+      run: 'git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git add .json
+
+        git commit -m "chore: auto upgrade to ${{ env.LATEST_VERSION }}"
+
+        git push origin HEAD:master
+
+        '
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 6
+      name: cron-update / tag
+      id: null
+      if: env.WORKFLOW_AUTO_UPDATE == 'true' && steps.checkout.outcome == 'success'
+      uses: null
+      run: 'SHA256=$(git rev-list --branches --max-count=1)
+
+        git tag -a v${{ env.WORKFLOW_NEW_TAG }} -m "v${{ env.WORKFLOW_NEW_TAG }}"
+        ${SHA256}
+
+        git push --follow-tags
+
+        '
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 7
+      name: cron-update / build docker image
+      id: null
+      if: env.WORKFLOW_AUTO_UPDATE == 'true' && steps.checkout.outcome == 'success'
+      uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7
+      run: null
+      shell: null
+      with:
+        workflow: docker.yml
+        wait-for-completion: false
+        token: ${{ secrets.REPOSITORY_TOKEN }}
+        inputs: '{ "release":"true", "readme":"true", "platform":"amd64,arm64" }'
+        ref: v${{ env.WORKFLOW_NEW_TAG }}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    step_count: 8
+job_count: 1
+step_count: 8
+actions_used: {}
+triggers:
+- workflow_dispatch
+- schedule
+languages: {}
+services: {}
+runners: {}

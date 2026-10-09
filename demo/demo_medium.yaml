@@ -1,0 +1,189 @@
+name: Build & Test Map Renderer
+'on':
+  push:
+    branches:
+    - master
+    - staging
+    - stable
+  merge_group: null
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - ready_for_review
+    branches:
+    - master
+    - staging
+    - stable
+env: {}
+defaults: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions: null
+jobs:
+  build:
+    name: build
+    runs_on: ${{ matrix.os }}
+    needs: null
+    if: github.event.pull_request.draft == false
+    environment: null
+    concurrency: null
+    outputs: {}
+    env: {}
+    defaults: {}
+    timeout_minutes: null
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+    continue_on_error: false
+    container: null
+    services: {}
+    steps:
+    - index: 0
+      name: Checkout Master
+      id: null
+      if: null
+      uses: actions/checkout@v4.2.2
+      run: null
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 1
+      name: Setup Submodule
+      id: null
+      if: null
+      uses: null
+      run: 'git submodule update --init --recursive
+
+        '
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 2
+      name: Pull engine updates
+      id: null
+      if: null
+      uses: space-wizards/submodule-dependency@v0.1.5
+      run: null
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 3
+      name: Update Engine Submodules
+      id: null
+      if: null
+      uses: null
+      run: 'cd RobustToolbox/
+
+        git submodule update --init --recursive
+
+        '
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 4
+      name: Setup .NET Core
+      id: null
+      if: null
+      uses: actions/setup-dotnet@v4.1.0
+      run: null
+      shell: null
+      with:
+        dotnet-version: 9.0.x
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 5
+      name: Install dependencies
+      id: null
+      if: null
+      uses: null
+      run: dotnet restore
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 6
+      name: Build Project
+      id: null
+      if: null
+      uses: null
+      run: dotnet build Content.MapRenderer --configuration Release --no-restore /p:WarningsAsErrors=nullable
+        /m
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    - index: 7
+      name: Run Map Renderer
+      id: null
+      if: null
+      uses: null
+      run: dotnet run --project Content.MapRenderer Dev
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    step_count: 8
+  ci-success:
+    name: Build & Test Debug
+    runs_on: ubuntu-latest
+    needs:
+    - build
+    if: null
+    environment: null
+    concurrency: null
+    outputs: {}
+    env: {}
+    defaults: {}
+    timeout_minutes: null
+    strategy: null
+    continue_on_error: false
+    container: null
+    services: {}
+    steps:
+    - index: 0
+      name: CI succeeded
+      id: null
+      if: null
+      uses: null
+      run: exit 0
+      shell: null
+      with: {}
+      env: {}
+      continue_on_error: false
+      timeout_minutes: null
+      working_directory: null
+    step_count: 1
+job_count: 2
+step_count: 9
+actions_used: {}
+triggers:
+- push
+- merge_group
+- pull_request
+languages: {}
+services: {}
+runners: {}

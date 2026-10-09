@@ -1,0 +1,32 @@
+
+Example name: demo_low.yaml
+True label: 0
+Predicted label: LOW
+LOW probability: 0.8329
+MEDIUM probability: 0.0898
+HIGH probability: 0.0773
+Job count: 1
+Step count: 8
+Original dataset row/file identifier: gha_0000037
+
+
+Example name: demo_medium.yaml
+True label: 1
+Predicted label: MEDIUM
+LOW probability: 0.1792
+MEDIUM probability: 0.6182
+HIGH probability: 0.2026
+Job count: 2
+Step count: 9
+Original dataset row/file identifier: gha_0000419
+
+
+Example name: demo_high.yaml
+True label: 2
+Predicted label: HIGH
+LOW probability: 0.0000
+MEDIUM probability: 0.0353
+HIGH probability: 0.9647
+Job count: 16
+Step count: 86
+Original dataset row/file identifier: gha_0000980
